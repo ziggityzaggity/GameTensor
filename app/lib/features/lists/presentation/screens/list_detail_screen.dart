@@ -19,11 +19,12 @@ class ListDetailScreen extends ConsumerWidget {
       body: entriesAsync.when(
         data: (entries) => ReorderableListView.builder(
           itemCount: entries.length,
-          onReorder: (oldIndex, newIndex) {
-            final adjustedNewIndex = newIndex > oldIndex ? newIndex - 1 : newIndex;
+          // onReorderItem already adjusts newIndex for the removed item, so no
+          // manual oldIndex/newIndex correction is needed.
+          onReorderItem: (oldIndex, newIndex) {
             ref
                 .read(listsActionsProvider)
-                .reorder(listId, entries[oldIndex].item.id, adjustedNewIndex);
+                .reorder(listId, entries[oldIndex].item.id, newIndex);
           },
           itemBuilder: (context, index) {
             final entry = entries[index];

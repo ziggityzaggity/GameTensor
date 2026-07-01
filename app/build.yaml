@@ -1,0 +1,9 @@
+# Postgres/Supabase rows use snake_case column names, so all generated
+# json_serializable (de)serializers must map snake_case JSON keys to the
+# camelCase Dart fields on our freezed models.
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          field_rename: snake

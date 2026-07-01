@@ -7,7 +7,9 @@ Future<void> bootstrap() async {
 
   await Supabase.initialize(
     url: Env.supabaseUrl,
-    anonKey: Env.supabaseAnonKey,
+    // The publishable/anon key: `supabase start` prints it as the "anon key",
+    // hence the env var name; supabase_flutter renamed the param to publishableKey.
+    publishableKey: Env.supabaseAnonKey,
     authOptions: const FlutterAuthClientOptions(authFlowType: AuthFlowType.pkce),
   );
 }
