@@ -1,0 +1,21 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "gametensor-web",
+      "runtimeExecutable": "C:\\Users\\aliza\\Documents\\flutter\\bin\\flutter.bat",
+      "runtimeArgs": [
+        "run",
+        "-d",
+        "web-server",
+        "--web-hostname",
+        "127.0.0.1",
+        "--web-port",
+        "8099",
+        "--dart-define-from-file=env/dev.json"
+      ],
+      "cwd": "C:\\PROJECTS\\GameTensor\\app",
+      "port": 8099
+    }
+  ]
+}
