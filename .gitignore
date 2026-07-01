@@ -1,0 +1,25 @@
+# Flutter/Dart
+app/.dart_tool/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/build/
+app/.packages
+app/pubspec.lock
+app/**/generated_plugin_registrant.dart
+app/ios/Pods/
+app/ios/.symlinks/
+app/android/.gradle/
+
+# Env secrets — never commit real keys
+app/env/dev.json
+app/env/*.local.json
+supabase/.env.local
+
+# Supabase local dev
+supabase/.branches/
+supabase/.temp/
+
+# IDE
+.idea/
+*.iml
+.vscode/
