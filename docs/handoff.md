@@ -108,6 +108,11 @@ dart run build_runner build --delete-conflicting-outputs
 
 ## Next steps (pick up here)
 
+> **See [demo-completion-plan.md](demo-completion-plan.md) for the full work
+> order**: gap analysis, security audit (including 3 confirmed bugs in the
+> committed migrations — fix those first), and milestone-by-milestone
+> instructions to ship a deployed web demo. The list below is the short version.
+
 Immediate wiring to make Phase 1 fully functional:
 1. **IGDB/BGG live search** — create a Twitch dev app, set `TWITCH_CLIENT_ID` /
    `TWITCH_CLIENT_SECRET` (+ `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`) in
