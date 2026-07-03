@@ -155,6 +155,19 @@ class GamesRepository {
     if (row == null) return null;
     return Game.fromJson(row);
   }
+
+  /// Batched lookup for a set of ids, used to render inline game cards (e.g. the
+  /// AI assistant's retrieved recommendations) without N round trips. Results
+  /// are reordered to match [ids] since PostgREST does not preserve `in()` order.
+  Future<List<Game>> getGamesByIds(List<String> ids) async {
+    if (ids.isEmpty) return [];
+    final rows = await _client.from('games').select('*, $_detailEmbeds').inFilter('id', ids);
+    final byId = {for (final r in rows) r['id'] as String: Game.fromJson(r)};
+    return [
+      for (final id in ids)
+        if (byId[id] != null) byId[id]!,
+    ];
+  }
 }
 
 final gamesRepositoryProvider = Provider<GamesRepository>((ref) {

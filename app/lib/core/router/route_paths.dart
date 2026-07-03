@@ -11,6 +11,7 @@ class RoutePaths {
   static const onboardingManualAdd = '/onboarding/manual-add';
   static const onboardingRateGames = '/onboarding/rate-games';
   static const search = '/search';
+  static const assistant = '/assistant';
   static const gameDetail = '/game/:id';
   static const library = '/library';
   static const lists = '/lists';

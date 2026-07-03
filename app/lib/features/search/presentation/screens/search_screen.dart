@@ -31,6 +31,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return AppShell(
       currentIndex: 0,
       title: 'Search',
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.push(RoutePaths.assistant),
+        icon: const Icon(Icons.auto_awesome),
+        label: const Text('AI Finder'),
+      ),
       body: Column(
         children: [
           Padding(

@@ -10,11 +10,18 @@ import '../router/route_paths.dart';
 /// screen body in this so navigation stays consistent across
 /// Search/Library/Lists/Feed/Profile.
 class AppShell extends ConsumerWidget {
-  const AppShell({super.key, required this.currentIndex, required this.body, this.title});
+  const AppShell({
+    super.key,
+    required this.currentIndex,
+    required this.body,
+    this.title,
+    this.floatingActionButton,
+  });
 
   final int currentIndex;
   final Widget body;
   final String? title;
+  final Widget? floatingActionButton;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -31,6 +38,7 @@ class AppShell extends ConsumerWidget {
         ],
       ),
       body: body,
+      floatingActionButton: floatingActionButton,
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentIndex,
         onDestinationSelected: (index) {

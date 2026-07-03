@@ -66,3 +66,13 @@ verify_jwt = true
 
 [functions.bgg-search]
 verify_jwt = true
+
+# rag-chat is user-facing: the gateway verifies the JWT, then the function
+# decodes it for the user id (ownership + rate limiting).
+[functions.rag-chat]
+verify_jwt = true
+
+# embed-games is cron/service-role, not user-facing: it authenticates via a
+# CRON_SECRET header check in-code, so JWT verification is disabled at the gateway.
+[functions.embed-games]
+verify_jwt = false

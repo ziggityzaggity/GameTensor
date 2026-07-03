@@ -7,6 +7,7 @@ import '../../features/auth/application/password_recovery_provider.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/reset_password_screen.dart';
+import '../../features/ai_assistant/presentation/screens/assistant_screen.dart';
 import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/feed/presentation/screens/feed_screen.dart';
 import '../../features/friends/presentation/screens/friend_requests_screen.dart';
@@ -107,6 +108,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const OnboardingRateGamesScreen(),
       ),
       GoRoute(path: RoutePaths.search, builder: (context, state) => const SearchScreen()),
+      GoRoute(path: RoutePaths.assistant, builder: (context, state) => const AssistantScreen()),
       GoRoute(
         path: RoutePaths.gameDetail,
         builder: (context, state) => GameDetailScreen(gameId: state.pathParameters['id']!),
