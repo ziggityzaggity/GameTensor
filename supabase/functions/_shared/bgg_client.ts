@@ -50,6 +50,25 @@ function textOf(el: Element | null, attr = "value"): string | undefined {
   return el?.getAttribute(attr) ?? undefined;
 }
 
+// BGG descriptions arrive as HTML with escaped entities. Strip tags and decode
+// the entities BGG actually emits so the stored `summary` is plain text, safe
+// for any future renderer (Next.js frontend, email digests). Order matters:
+// decode &amp; last so it can't resurrect other entities.
+export function sanitizeDescription(raw: string): string {
+  return raw
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&#10;/g, "\n")
+    .replace(/&mdash;/g, "—")
+    .replace(/&ndash;/g, "–")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export async function searchBggGames(query: string): Promise<BggSearchResult[]> {
   const xml = await fetchWithRetry(
     `${BGG_BASE_URL}/search?query=${encodeURIComponent(query)}&type=boardgame`,
@@ -89,11 +108,13 @@ export async function getBggThing(id: number): Promise<BggThingDetail | null> {
   const rankEl = item.querySelector('rank[name="boardgame"]');
   const ratingEl = item.querySelector("ratings > average");
 
+  const rawDescription = item.querySelector("description")?.textContent;
+
   return {
     id,
     name: textOf(primaryName) ?? "Unknown",
     type: item.getAttribute("type") ?? "boardgame",
-    description: item.querySelector("description")?.textContent,
+    description: rawDescription ? sanitizeDescription(rawDescription) : undefined,
     image: item.querySelector("image")?.textContent,
     minPlayers: item.querySelector("minplayers") ? Number(textOf(item.querySelector("minplayers"))) : undefined,
     maxPlayers: item.querySelector("maxplayers") ? Number(textOf(item.querySelector("maxplayers"))) : undefined,

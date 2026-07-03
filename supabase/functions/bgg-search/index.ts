@@ -4,23 +4,47 @@
 import { createAdminClient } from "../_shared/supabase_admin.ts";
 import { searchBggGames, getBggThing } from "../_shared/bgg_client.ts";
 import { mapBggCategoryOrMechanic } from "../_shared/genre_mapping.ts";
+import { corsHeaders, handlePreflight } from "../_shared/cors.ts";
+import { userIdFromAuthHeader } from "../_shared/auth.ts";
+import { checkRateLimit } from "../_shared/rate_limit.ts";
 
 const TABLETOP_PLATFORM_ID = 9;
 const MAX_RESULTS = 10; // cap thing-lookup fan-out per search to stay within BGG's informal rate limits
+const RATE_LIMIT = 10; // searches per user per minute
+const RATE_WINDOW_SECONDS = 60;
 
 Deno.serve(async (req) => {
+  const preflight = handlePreflight(req);
+  if (preflight) return preflight;
+
+  const cors = corsHeaders(req);
+  const json = (body: unknown, status: number) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
+
   if (req.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
+    return json({ error: "method not allowed" }, 405);
   }
 
   try {
     const { query } = await req.json();
-    if (!query || typeof query !== "string") {
-      return new Response(JSON.stringify({ error: "query is required" }), { status: 400 });
+    if (typeof query !== "string" || query.trim().length < 2 || query.trim().length > 100) {
+      return json({ error: "query must be a string of 2-100 characters" }, 400);
     }
 
     const admin = createAdminClient();
-    const searchResults = await searchBggGames(query);
+
+    const userId = userIdFromAuthHeader(req);
+    if (userId) {
+      const allowed = await checkRateLimit(admin, userId, "bgg-search", RATE_LIMIT, RATE_WINDOW_SECONDS);
+      if (!allowed) {
+        return json({ error: "rate limit exceeded" }, 429);
+      }
+    }
+
+    const searchResults = await searchBggGames(query.trim());
     const upsertedIds: string[] = [];
 
     for (const searchResult of searchResults.slice(0, MAX_RESULTS)) {
@@ -93,11 +117,11 @@ Deno.serve(async (req) => {
       .select("*, tabletop_game_details(*), game_genres(genre_id)")
       .in("id", upsertedIds);
 
-    return new Response(JSON.stringify({ results: results ?? [] }), {
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ results: results ?? [] }, 200);
   } catch (err) {
+    // Log detail server-side only; upstream (BGG) error bodies may carry URLs
+    // and must never reach the client.
     console.error(err);
-    return new Response(JSON.stringify({ error: String(err) }), { status: 500 });
+    return json({ error: "internal error" }, 500);
   }
 });
