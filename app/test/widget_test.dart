@@ -5,12 +5,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:gametensor_app/core/validation/username.dart';
 import 'package:gametensor_app/core/widgets/completion_badge.dart';
 import 'package:gametensor_app/data/models/completion_status.dart';
 import 'package:gametensor_app/data/models/game.dart';
 import 'package:gametensor_app/data/repositories/games_repository.dart';
 
 void main() {
+  group('validateUsername', () {
+    test('accepts valid lowercase alnum/underscore names within length', () {
+      expect(validateUsername('player_1'), isNull);
+      expect(validateUsername('abc'), isNull);
+      expect(validateUsername('a' * 30), isNull);
+      // Surrounding whitespace is trimmed before validation.
+      expect(validateUsername('  gamer99  '), isNull);
+    });
+
+    test('rejects too-short names', () {
+      expect(validateUsername('ab'), isNotNull);
+      expect(validateUsername(''), isNotNull);
+    });
+
+    test('rejects too-long names', () {
+      expect(validateUsername('a' * 31), isNotNull);
+    });
+
+    test('rejects spaces and uppercase and punctuation', () {
+      expect(validateUsername('Has Space'), isNotNull);
+      expect(validateUsername('UPPER'), isNotNull);
+      expect(validateUsername('has-dash'), isNotNull);
+      expect(validateUsername('emoji😀name'), isNotNull);
+    });
+  });
+
   group('playerRangeOverlaps', () {
     // Seed tabletop ranges: Catan 3-4, Wingspan 1-5, Codenames 2-8.
     test('min=5 matches games that seat at least 5 players', () {

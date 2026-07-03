@@ -17,6 +17,12 @@ class NotFoundFailure extends Failure {
   const NotFoundFailure(super.message);
 }
 
+/// Input rejected by a DB constraint (e.g. duplicate username, bad format),
+/// surfaced to the UI as a field-level message rather than a raw error.
+class ValidationFailure extends Failure {
+  const ValidationFailure(super.message);
+}
+
 class UnknownFailure extends Failure {
   const UnknownFailure(super.message);
 }

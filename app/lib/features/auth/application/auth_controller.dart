@@ -1,7 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/failure.dart';
+import '../../../core/router/route_paths.dart';
 import '../../../data/repositories/auth_repository.dart';
+
+/// The absolute URL Supabase should redirect the recovery email back to.
+/// Built from the running web origin so it works locally and once deployed,
+/// and uses the hash-router form (`/#/reset-callback`) go_router serves on web.
+/// This exact URL must be in the Supabase redirect allowlist.
+String passwordResetRedirectUrl() {
+  final base = Uri.base;
+  return '${base.scheme}://${base.host}${base.hasPort ? ':${base.port}' : ''}/#${RoutePaths.resetPassword}';
+}
 
 class AuthController extends AsyncNotifier<void> {
   @override
@@ -20,6 +30,16 @@ class AuthController extends AsyncNotifier<void> {
 
   Future<Failure?> signInWithApple() =>
       _run(() => ref.read(authRepositoryProvider).signInWithApple());
+
+  Future<Failure?> sendPasswordReset(String email) => _run(
+        () => ref.read(authRepositoryProvider).sendPasswordReset(
+              email,
+              redirectTo: passwordResetRedirectUrl(),
+            ),
+      );
+
+  Future<Failure?> updatePassword(String newPassword) =>
+      _run(() => ref.read(authRepositoryProvider).updatePassword(newPassword));
 
   Future<Failure?> signOut() => _run(() => ref.read(authRepositoryProvider).signOut());
 

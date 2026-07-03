@@ -25,7 +25,7 @@ class OnboardingWelcomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               FilledButton(
-                onPressed: () => context.go(RoutePaths.onboardingLinkOrManual),
+                onPressed: () => context.go(RoutePaths.onboardingUsername),
                 child: const Text('Get started'),
               ),
             ],

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/route_paths.dart';
 import '../../../../core/widgets/app_shell.dart';
+import '../../../../data/repositories/auth_repository.dart';
 import '../../application/profile_view_controller.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -12,6 +15,7 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(profileByUsernameProvider(username));
+    final currentUserId = ref.watch(authRepositoryProvider).currentUser?.id;
 
     return AppShell(
       currentIndex: 3,
@@ -19,6 +23,7 @@ class ProfileScreen extends ConsumerWidget {
       body: profileAsync.when(
         data: (profile) {
           if (profile == null) return const Center(child: Text('Profile not found'));
+          final isOwnProfile = currentUserId != null && profile.id == currentUserId;
           return Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -36,6 +41,14 @@ class ProfileScreen extends ConsumerWidget {
                 if (profile.bio != null) ...[
                   const SizedBox(height: 12),
                   Text(profile.bio!),
+                ],
+                if (isOwnProfile) ...[
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    onPressed: () => context.go(RoutePaths.editProfile),
+                    icon: const Icon(Icons.edit),
+                    label: const Text('Edit profile'),
+                  ),
                 ],
               ],
             ),

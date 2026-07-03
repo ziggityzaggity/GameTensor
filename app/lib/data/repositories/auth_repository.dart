@@ -60,6 +60,27 @@ class AuthRepository {
     }
   }
 
+  /// Sends a password-recovery email. The link lands on the app's
+  /// `/reset-callback` route with a recovery session, where the user sets a new
+  /// password. [redirectTo] must be in the Supabase redirect allowlist.
+  Future<void> sendPasswordReset(String email, {required String redirectTo}) async {
+    try {
+      await _client.auth.resetPasswordForEmail(email, redirectTo: redirectTo);
+    } on AuthException catch (e) {
+      throw AuthFailure(e.message);
+    }
+  }
+
+  /// Sets a new password for the currently-authenticated user. Called from the
+  /// reset screen while a PASSWORD_RECOVERY session is active.
+  Future<void> updatePassword(String newPassword) async {
+    try {
+      await _client.auth.updateUser(UserAttributes(password: newPassword));
+    } on AuthException catch (e) {
+      throw AuthFailure(e.message);
+    }
+  }
+
   Future<void> signOut() async {
     await _client.auth.signOut();
   }

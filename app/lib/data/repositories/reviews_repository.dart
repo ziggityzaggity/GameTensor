@@ -9,14 +9,20 @@ class ReviewsRepository {
 
   final SupabaseClient _client;
 
-  Future<List<Review>> getReviewsForGame(String gameId) async {
+  /// Reviews for a game, each joined with its author's public profile fields
+  /// (username/display name) via a PostgREST embed. RLS already filters out
+  /// reviews whose author isn't visible to the caller.
+  Future<List<ReviewWithAuthor>> getReviewsForGame(String gameId) async {
+    // Disambiguate the embed with the FK name: reviews relates to profiles both
+    // directly (user_id) and indirectly (via review_likes), so a bare
+    // `profiles(...)` embed is ambiguous (PostgREST PGRST201).
     final rows = await _client
         .from('reviews')
-        .select()
+        .select('*, profiles!reviews_user_id_fkey(username, display_name)')
         .eq('game_id', gameId)
         .isFilter('deleted_at', null)
         .order('created_at', ascending: false);
-    return rows.map((r) => Review.fromJson(r)).toList();
+    return rows.map((r) => ReviewWithAuthor.fromJson(r)).toList();
   }
 
   Future<void> upsertReview(

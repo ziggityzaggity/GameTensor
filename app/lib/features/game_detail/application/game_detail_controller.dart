@@ -12,8 +12,14 @@ final gameDetailProvider = FutureProvider.family<Game?, String>((ref, gameId) {
   return ref.read(gamesRepositoryProvider).getGameDetail(gameId);
 });
 
-final gameReviewsProvider = FutureProvider.family<List<Review>, String>((ref, gameId) {
+final gameReviewsProvider = FutureProvider.family<List<ReviewWithAuthor>, String>((ref, gameId) {
   return ref.read(reviewsRepositoryProvider).getReviewsForGame(gameId);
+});
+
+/// The signed-in user's id, so the UI can gate edit/delete affordances to the
+/// user's own review. Null when signed out.
+final currentUserIdProvider = Provider<String?>((ref) {
+  return ref.read(authRepositoryProvider).currentUser?.id;
 });
 
 final myGameLogProvider = FutureProvider.family<UserGameLog?, String>((ref, gameId) async {
@@ -38,10 +44,28 @@ class GameDetailActions {
     ref.invalidate(myGameLogProvider(gameId));
   }
 
-  Future<void> submitReview(String gameId, String body, {double? rating}) async {
+  Future<void> submitReview(
+    String gameId,
+    String body, {
+    double? rating,
+    bool containsSpoilers = false,
+  }) async {
     final userId = ref.read(authRepositoryProvider).currentUser?.id;
     if (userId == null) return;
-    await ref.read(reviewsRepositoryProvider).upsertReview(userId, gameId, body: body, rating: rating);
+    await ref.read(reviewsRepositoryProvider).upsertReview(
+          userId,
+          gameId,
+          body: body,
+          rating: rating,
+          containsSpoilers: containsSpoilers,
+        );
+    ref.invalidate(gameReviewsProvider(gameId));
+  }
+
+  Future<void> deleteReview(String gameId) async {
+    final userId = ref.read(authRepositoryProvider).currentUser?.id;
+    if (userId == null) return;
+    await ref.read(reviewsRepositoryProvider).deleteReview(userId, gameId);
     ref.invalidate(gameReviewsProvider(gameId));
   }
 }

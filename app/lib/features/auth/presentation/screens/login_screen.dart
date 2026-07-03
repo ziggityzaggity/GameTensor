@@ -80,7 +80,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   icon: const Icon(Icons.apple),
                   label: const Text('Continue with Apple'),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 4),
+                TextButton(
+                  onPressed: () => context.go(RoutePaths.forgotPassword),
+                  child: const Text('Forgot password?'),
+                ),
                 TextButton(
                   onPressed: () => context.go(RoutePaths.signup),
                   child: const Text("Don't have an account? Sign up"),

@@ -51,6 +51,16 @@ class OnboardingController extends Notifier<Map<String, OnboardingSelection>> {
     state = {...state, gameId: current.copyWith(liked: liked)};
   }
 
+  /// Persists the username chosen in the onboarding username step. Throws a
+  /// [Failure] (e.g. duplicate) that the screen surfaces; the router's
+  /// onboarding gate keeps the user in the flow until the final step.
+  Future<void> saveUsername(String username) async {
+    final userId = ref.read(authRepositoryProvider).currentUser?.id;
+    if (userId == null) return;
+    await ref.read(profilesRepositoryProvider).updateProfile(userId, username: username);
+    ref.invalidate(currentProfileProvider);
+  }
+
   Future<void> submitAndCompleteOnboarding() async {
     final userId = ref.read(authRepositoryProvider).currentUser?.id;
     if (userId == null) return;

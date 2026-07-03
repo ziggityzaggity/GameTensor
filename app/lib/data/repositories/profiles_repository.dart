@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../bootstrap.dart';
+import '../../core/errors/failure.dart';
 import '../models/profile.dart';
 import 'auth_repository.dart';
 
@@ -9,6 +10,10 @@ class ProfilesRepository {
   ProfilesRepository(this._client);
 
   final SupabaseClient _client;
+
+  // Postgres error codes surfaced when a profile write violates a constraint.
+  static const _uniqueViolation = '23505';
+  static const _checkViolation = '23514';
 
   Future<Profile?> getProfile(String userId) async {
     final row = await _client.from('profiles').select().eq('id', userId).maybeSingle();
@@ -22,21 +27,39 @@ class ProfilesRepository {
     return Profile.fromJson(row);
   }
 
+  /// Updates the given fields on the user's own profile row. Only non-null
+  /// arguments are written, so callers can update any subset.
+  ///
+  /// Throws [ValidationFailure] on a duplicate username (unique violation) or a
+  /// bad username format that slipped past client validation (check violation),
+  /// so the edit screen can show a friendly message instead of a raw 400.
   Future<void> updateProfile(
     String userId, {
+    String? username,
     String? displayName,
     String? bio,
     String? avatarUrl,
     ProfileVisibility? visibility,
   }) async {
     final updates = <String, dynamic>{
+      if (username != null) 'username': username,
       if (displayName != null) 'display_name': displayName,
       if (bio != null) 'bio': bio,
       if (avatarUrl != null) 'avatar_url': avatarUrl,
       if (visibility != null) 'profile_visibility': visibility.name,
     };
     if (updates.isEmpty) return;
-    await _client.from('profiles').update(updates).eq('id', userId);
+    try {
+      await _client.from('profiles').update(updates).eq('id', userId);
+    } on PostgrestException catch (e) {
+      if (e.code == _uniqueViolation) {
+        throw const ValidationFailure('That username is already taken');
+      }
+      if (e.code == _checkViolation) {
+        throw const ValidationFailure('That username is not allowed');
+      }
+      rethrow;
+    }
   }
 
   Future<void> completeOnboarding(String userId) async {

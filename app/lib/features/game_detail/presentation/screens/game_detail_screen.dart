@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/game_detail_controller.dart';
 import '../widgets/log_status_sheet.dart';
+import '../widgets/review_tile.dart';
 import '../widgets/write_review_sheet.dart';
 
 class GameDetailScreen extends ConsumerWidget {
@@ -15,6 +16,7 @@ class GameDetailScreen extends ConsumerWidget {
     final gameAsync = ref.watch(gameDetailProvider(gameId));
     final reviewsAsync = ref.watch(gameReviewsProvider(gameId));
     final myLogAsync = ref.watch(myGameLogProvider(gameId));
+    final currentUserId = ref.watch(currentUserIdProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(gameAsync.valueOrNull?.canonicalName ?? 'Game')),
@@ -65,9 +67,10 @@ class GameDetailScreen extends ConsumerWidget {
                       )
                     : Column(
                         children: reviews
-                            .map((r) => ListTile(
-                                  title: Text(r.body),
-                                  subtitle: r.rating != null ? Text('Rating: ${r.rating}/10') : null,
+                            .map((r) => ReviewTile(
+                                  gameId: gameId,
+                                  item: r,
+                                  isOwn: r.review.userId == currentUserId,
                                 ))
                             .toList(),
                       ),

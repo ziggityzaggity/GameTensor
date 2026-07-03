@@ -26,7 +26,19 @@ file_size_limit = "50MiB"
 [auth]
 enabled = true
 site_url = "http://localhost:3000"
-additional_redirect_urls = ["io.supabase.gametensor://login-callback"]
+# Redirect allowlist (exact-match, no wildcards per demo-completion-plan.md 3.4).
+# The password-recovery email redirects back to the app, which then routes to
+# /reset-callback on the PASSWORD_RECOVERY event. On Flutter web (hash router)
+# the app passes <origin>/#/reset-callback; GoTrue drops the fragment and matches
+# the <origin> — locally that equals site_url, so no extra entry is needed here.
+# At deploy, set site_url to the Vercel URL and add any other origins below.
+additional_redirect_urls = [
+  "io.supabase.gametensor://login-callback",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  "http://localhost:8099",
+  "http://127.0.0.1:8099",
+]
 jwt_expiry = 3600
 enable_signup = true
 
