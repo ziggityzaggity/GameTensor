@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/route_paths.dart';
 import '../../../../core/widgets/app_shell.dart';
+import '../../../recommendations/presentation/widgets/for_you_rail.dart';
 import '../../application/search_controller.dart';
 import '../widgets/game_result_tile.dart';
 import '../widgets/search_filters_sheet.dart';
@@ -63,6 +64,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
           ),
           if (state.isLoading) const LinearProgressIndicator(),
+          // Discover state: personalized picks show only while no search is
+          // active, so the rail never competes with actual results.
+          if (state.query.trim().isEmpty) const ForYouRail(),
           Expanded(
             child: ListView.builder(
               itemCount: state.results.length,

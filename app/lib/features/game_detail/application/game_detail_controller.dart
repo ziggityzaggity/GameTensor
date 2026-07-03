@@ -7,6 +7,7 @@ import '../../../data/repositories/game_logs_repository.dart';
 import '../../../data/repositories/games_repository.dart';
 import '../../../data/repositories/reviews_repository.dart';
 import '../../../data/repositories/auth_repository.dart';
+import '../../recommendations/application/for_you_controller.dart';
 
 final gameDetailProvider = FutureProvider.family<Game?, String>((ref, gameId) {
   return ref.read(gamesRepositoryProvider).getGameDetail(gameId);
@@ -42,6 +43,8 @@ class GameDetailActions {
           liked: liked,
         );
     ref.invalidate(myGameLogProvider(gameId));
+    // The DB trigger rescored this user's recommendations on the write above.
+    ref.invalidate(forYouRailProvider);
   }
 
   Future<void> submitReview(
@@ -60,6 +63,7 @@ class GameDetailActions {
           containsSpoilers: containsSpoilers,
         );
     ref.invalidate(gameReviewsProvider(gameId));
+    ref.invalidate(forYouRailProvider);
   }
 
   Future<void> deleteReview(String gameId) async {
@@ -67,6 +71,7 @@ class GameDetailActions {
     if (userId == null) return;
     await ref.read(reviewsRepositoryProvider).deleteReview(userId, gameId);
     ref.invalidate(gameReviewsProvider(gameId));
+    ref.invalidate(forYouRailProvider);
   }
 }
 

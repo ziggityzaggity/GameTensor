@@ -93,9 +93,16 @@ in code.
 
 ## 2. Recommendation workflow (Milestone 6)
 
-Pure SQL, no external services. Runs as `recompute_recommendations()` invoked
-nightly by `pg_cron` and on-demand via a `CRON_SECRET`-protected `recommend-batch`
-Edge Function (for the demo).
+Pure SQL, no external services. Two update paths (user-confirmed design):
+- **Heavy batch**: `recompute_recommendations()` rebuilds the item-item
+  similarity matrix and rescores all users — nightly `pg_cron` at deploy time,
+  on-demand via the `CRON_SECRET`-protected `recommend-batch` Edge Function.
+- **Instant per-user rescore**: AFTER-row triggers on `reviews`,
+  `user_game_logs`, and `recommendation_impressions` call
+  `recompute_user_recs(user_id)`, rescoring just that user against the CURRENT
+  similarity cache in the same transaction — so a new review/like/dislike/
+  dismissal updates the "For You" rail immediately, on every write path
+  (app, future Xbox sync, SQL), without waiting for the batch.
 
 ### 2.1 Signal extraction
 Per (user, game) from `user_game_logs` and `reviews`:
@@ -122,6 +129,9 @@ pop(g)          = normalized popularity_score (0..1)
 final(u, g)     = 0.8 × normalized(cf_score) + 0.2 × pop(g)
 ```
 - Exclude games u already logged.
+- Drop candidates with `cf_score <= 0` before normalization: a net-disliked-
+  similar candidate must not resurface on the popularity term (per-user min-max
+  normalization would otherwise score a lone negative candidate at 0.2×pop).
 - **Dismissal feedback**: multiply by 0.5^d where d = count of `dismissed`
   impressions for (u, g) from `recommendation_impressions`.
 - **Cold start** (user has < 3 signals): skip CF; rank by

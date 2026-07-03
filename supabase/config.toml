@@ -76,3 +76,8 @@ verify_jwt = true
 # CRON_SECRET header check in-code, so JWT verification is disabled at the gateway.
 [functions.embed-games]
 verify_jwt = false
+
+# recommend-batch is cron/service-role like embed-games: CRON_SECRET header
+# check in-code, no gateway JWT verification.
+[functions.recommend-batch]
+verify_jwt = false
