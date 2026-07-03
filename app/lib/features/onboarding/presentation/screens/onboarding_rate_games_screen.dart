@@ -3,15 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/route_paths.dart';
+import '../../../../data/repositories/lookups_repository.dart';
 import '../../application/onboarding_controller.dart';
 
-const _completionStatuses = [
-  (id: 1, label: 'Not Started'),
-  (id: 2, label: 'Playing'),
-  (id: 4, label: 'Dropped'),
-  (id: 5, label: 'Completed (Main Story)'),
-  (id: 6, label: '100% Complete'),
-];
+// Onboarding only asks about games the user has actually engaged with, so it
+// curates the completion scale down to these codes (dropping Wishlist/On Hold).
+// Labels still come from the DB provider — only the selection is curated here.
+const _onboardingStatusCodes = {'not_started', 'playing', 'dropped', 'completed_main', 'completed_100'};
 
 class OnboardingRateGamesScreen extends ConsumerWidget {
   const OnboardingRateGamesScreen({super.key});
@@ -21,6 +19,8 @@ class OnboardingRateGamesScreen extends ConsumerWidget {
     final notifier = ref.read(onboardingControllerProvider.notifier);
     final selections = ref.watch(onboardingControllerProvider);
     final games = notifier.selectedGames;
+    final statuses = ref.watch(completionStatusesProvider).valueOrNull ?? const [];
+    final choices = statuses.where((s) => _onboardingStatusCodes.contains(s.code)).toList();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Rate what you\'ve played')),
@@ -40,7 +40,7 @@ class OnboardingRateGamesScreen extends ConsumerWidget {
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 6,
-                    children: _completionStatuses
+                    children: choices
                         .map((s) => ChoiceChip(
                               label: Text(s.label),
                               selected: selection?.completionStatusId == s.id,

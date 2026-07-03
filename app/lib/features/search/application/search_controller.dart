@@ -3,22 +3,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/game.dart';
 import '../../../data/repositories/games_repository.dart';
 
-class SearchFilters {
-  const SearchFilters({this.kind});
-  final GameKind? kind;
-
-  SearchFilters copyWith({GameKind? kind}) => SearchFilters(kind: kind ?? this.kind);
-}
-
 class SearchState {
-  const SearchState({this.query = '', this.filters = const SearchFilters(), this.results = const [], this.isLoading = false});
+  const SearchState({
+    this.query = '',
+    this.filters = const GameSearchFilters(),
+    this.results = const [],
+    this.isLoading = false,
+  });
 
   final String query;
-  final SearchFilters filters;
+  final GameSearchFilters filters;
   final List<Game> results;
   final bool isLoading;
 
-  SearchState copyWith({String? query, SearchFilters? filters, List<Game>? results, bool? isLoading}) {
+  SearchState copyWith({
+    String? query,
+    GameSearchFilters? filters,
+    List<Game>? results,
+    bool? isLoading,
+  }) {
     return SearchState(
       query: query ?? this.query,
       filters: filters ?? this.filters,
@@ -36,7 +39,7 @@ class SearchController extends Notifier<SearchState> {
     state = state.copyWith(query: query, isLoading: true);
     final repo = ref.read(gamesRepositoryProvider);
 
-    var results = await repo.searchLocal(query, kind: state.filters.kind);
+    var results = await repo.searchLocal(query, filters: state.filters);
 
     // If local search is thin, fall back to live IGDB/BGG upsert-on-demand,
     // then re-query local search so the client always reads from our own schema.
@@ -51,15 +54,36 @@ class SearchController extends Notifier<SearchState> {
           // Best-effort: ignore remote fallback failures, local results still show.
         }
       }
-      results = await repo.searchLocal(query, kind: state.filters.kind);
+      results = await repo.searchLocal(query, filters: state.filters);
     }
 
     state = state.copyWith(results: results, isLoading: false);
   }
 
-  void setKindFilter(GameKind? kind) {
-    state = state.copyWith(filters: state.filters.copyWith(kind: kind));
+  void _applyFilters(GameSearchFilters filters) {
+    state = state.copyWith(filters: filters);
     search(state.query);
+  }
+
+  void setKindFilter(GameKind? kind) {
+    // Player-count only applies to tabletop; switching to video games clears it.
+    if (kind == GameKind.videoGame) {
+      _applyFilters(state.filters.copyWith(kind: kind, minPlayers: null, maxPlayers: null));
+    } else {
+      _applyFilters(state.filters.copyWith(kind: kind));
+    }
+  }
+
+  void setGenreFilter(int? genreId) {
+    _applyFilters(state.filters.copyWith(genreId: genreId));
+  }
+
+  void setPlatformFilter(int? platformId) {
+    _applyFilters(state.filters.copyWith(platformId: platformId));
+  }
+
+  void setPlayerRange({int? minPlayers, int? maxPlayers}) {
+    _applyFilters(state.filters.copyWith(minPlayers: minPlayers, maxPlayers: maxPlayers));
   }
 }
 

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/route_paths.dart';
 import '../../../../core/widgets/app_shell.dart';
+import '../../../../data/repositories/lookups_repository.dart';
 import '../../application/library_controller.dart';
 
 class LibraryScreen extends ConsumerWidget {
@@ -12,6 +13,7 @@ class LibraryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final libraryAsync = ref.watch(libraryProvider);
+    final statusLabels = ref.watch(completionStatusLabelsProvider).valueOrNull ?? const {};
 
     return AppShell(
       currentIndex: 1,
@@ -28,7 +30,7 @@ class LibraryScreen extends ConsumerWidget {
                         ? CircleAvatar(backgroundImage: NetworkImage(entry.game!.coverImageUrl!))
                         : const CircleAvatar(child: Icon(Icons.videogame_asset_outlined)),
                     title: Text(entry.game?.canonicalName ?? 'Unknown game'),
-                    subtitle: Text(_statusLabel(entry.log.completionStatusId)),
+                    subtitle: Text(statusLabels[entry.log.completionStatusId] ?? 'Unknown'),
                     trailing: entry.log.liked == null
                         ? null
                         : Icon(entry.log.liked! ? Icons.thumb_up : Icons.thumb_down, size: 18),
@@ -40,18 +42,5 @@ class LibraryScreen extends ConsumerWidget {
         error: (e, _) => Center(child: Text('Failed to load library: $e')),
       ),
     );
-  }
-
-  String _statusLabel(int id) {
-    const labels = {
-      0: 'Wishlist',
-      1: 'Not Started',
-      2: 'Playing',
-      3: 'On Hold',
-      4: 'Dropped',
-      5: 'Completed (Main Story)',
-      6: '100% Complete',
-    };
-    return labels[id] ?? 'Unknown';
   }
 }
