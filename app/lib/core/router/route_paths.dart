@@ -15,6 +15,8 @@ class RoutePaths {
   static const library = '/library';
   static const lists = '/lists';
   static const listDetail = '/lists/:id';
+  static const feed = '/feed';
+  static const friendRequests = '/friends/requests';
   static const profile = '/profile/:username';
   static const editProfile = '/profile/edit';
 

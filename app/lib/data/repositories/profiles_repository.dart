@@ -27,6 +27,23 @@ class ProfilesRepository {
     return Profile.fromJson(row);
   }
 
+  /// Case-insensitive username prefix search for finding people to friend.
+  /// The profiles RLS (`can_view_profile`) already filters out profiles the
+  /// caller can't see, so private strangers never appear in results.
+  Future<List<Profile>> searchByUsername(String prefix, {int limit = 20}) async {
+    final trimmed = prefix.trim();
+    if (trimmed.isEmpty) return const [];
+    // Escape ILIKE wildcards in user input so `%`/`_` are matched literally.
+    final escaped = trimmed.replaceAll('%', r'\%').replaceAll('_', r'\_');
+    final rows = await _client
+        .from('profiles')
+        .select()
+        .ilike('username', '$escaped%')
+        .order('username')
+        .limit(limit);
+    return rows.map((r) => Profile.fromJson(r)).toList();
+  }
+
   /// Updates the given fields on the user's own profile row. Only non-null
   /// arguments are written, so callers can update any subset.
   ///

@@ -6,8 +6,9 @@ import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/profiles_repository.dart';
 import '../router/route_paths.dart';
 
-/// Shared bottom-nav shell for the four main-app tabs. Wrap each top-level
-/// screen body in this so navigation stays consistent across Search/Library/Lists/Profile.
+/// Shared bottom-nav shell for the five main-app tabs. Wrap each top-level
+/// screen body in this so navigation stays consistent across
+/// Search/Library/Lists/Feed/Profile.
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.currentIndex, required this.body, this.title});
 
@@ -41,6 +42,8 @@ class AppShell extends ConsumerWidget {
             case 2:
               context.go(RoutePaths.lists);
             case 3:
+              context.go(RoutePaths.feed);
+            case 4:
               final username = profileAsync.valueOrNull?.username;
               if (username != null) context.go(RoutePaths.profilePath(username));
           }
@@ -49,6 +52,7 @@ class AppShell extends ConsumerWidget {
           NavigationDestination(icon: Icon(Icons.search), label: 'Search'),
           NavigationDestination(icon: Icon(Icons.videogame_asset), label: 'Library'),
           NavigationDestination(icon: Icon(Icons.list), label: 'Lists'),
+          NavigationDestination(icon: Icon(Icons.dynamic_feed), label: 'Feed'),
           NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),

@@ -8,6 +8,8 @@ import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/auth/presentation/screens/signup_screen.dart';
+import '../../features/feed/presentation/screens/feed_screen.dart';
+import '../../features/friends/presentation/screens/friend_requests_screen.dart';
 import '../../features/game_detail/presentation/screens/game_detail_screen.dart';
 import '../../features/library/presentation/screens/library_screen.dart';
 import '../../features/lists/presentation/screens/list_detail_screen.dart';
@@ -114,6 +116,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RoutePaths.listDetail,
         builder: (context, state) => ListDetailScreen(listId: state.pathParameters['id']!),
+      ),
+      GoRoute(path: RoutePaths.feed, builder: (context, state) => const FeedScreen()),
+      GoRoute(
+        path: RoutePaths.friendRequests,
+        builder: (context, state) => const FriendRequestsScreen(),
       ),
       // Registered before /profile/:username so the literal "edit" segment isn't
       // captured as a username.

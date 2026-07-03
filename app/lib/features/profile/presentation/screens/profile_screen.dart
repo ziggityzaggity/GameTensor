@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../core/widgets/app_shell.dart';
 import '../../../../data/repositories/auth_repository.dart';
+import '../../../friends/presentation/widgets/friend_button.dart';
 import '../../application/profile_view_controller.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -18,7 +19,7 @@ class ProfileScreen extends ConsumerWidget {
     final currentUserId = ref.watch(authRepositoryProvider).currentUser?.id;
 
     return AppShell(
-      currentIndex: 3,
+      currentIndex: 4,
       title: '@$username',
       body: profileAsync.when(
         data: (profile) {
@@ -42,14 +43,22 @@ class ProfileScreen extends ConsumerWidget {
                   const SizedBox(height: 12),
                   Text(profile.bio!),
                 ],
+                const SizedBox(height: 16),
                 if (isOwnProfile) ...[
-                  const SizedBox(height: 16),
                   OutlinedButton.icon(
                     onPressed: () => context.go(RoutePaths.editProfile),
                     icon: const Icon(Icons.edit),
                     label: const Text('Edit profile'),
                   ),
-                ],
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () => context.push(RoutePaths.friendRequests),
+                    icon: const Icon(Icons.group),
+                    label: const Text('Friends & requests'),
+                  ),
+                ] else
+                  // Friend action driven by the caller's relationship to this user.
+                  FriendButton(userId: profile.id),
               ],
             ),
           );
