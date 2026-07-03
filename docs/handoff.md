@@ -15,19 +15,30 @@ swappable LLM provider.
 The full architecture + phased roadmap lives in the approved plan:
 `C:\Users\aliza\.claude\plans\i-want-to-make-squishy-hellman.md` — read it first.
 
-## Current status: Phase 1 built and verified end-to-end
+## Current status: ALL feature milestones (M1–M6) built and verified
 
-Phase 1 = auth, unified game catalog + search, game logging (completion label +
-like/dislike + reviews), custom lists, and the manual-add onboarding flow.
-It compiles, runs on web, and was verified against a live local Supabase stack
-(signup + profile trigger, RLS reads/writes, RLS forgery block, catalog FTS).
+Everything in [demo-completion-plan.md](demo-completion-plan.md) §4 except
+deployment is done, each milestone verified against the live local stack and
+committed separately:
+- `5c84ed0` M1 security fixes (0010) + Edge Function hardening (CORS/rate
+  limit/validation/error hygiene/BGG sanitize)
+- `18b57af` M2 real search filters (genre/platform/player-count) + DB-driven lookups
+- `17d663c` M3 password reset, profile editing + avatars (0011), username
+  onboarding, review UX
+- `9b77cab` M4 friends lifecycle + requests inbox + username search + activity feed
+- `de77a75` M5 RAG game-finder (0012): gte-small embeddings in the edge runtime,
+  match_games HNSW retrieval, grounded multi-turn rag-chat with injection
+  defenses, OpenRouter-compatible LlmProvider + keyless stub, AI Finder UI
+- `8b1bb61` M6 recommender (0013): SQL item-item CF (dislike penalty, dismissal
+  decay, cold-start), instant per-user rescore TRIGGERS on reviews/logs/
+  impressions, recommend-batch function, "For You" rail
 
-Git history (branch `main`):
-- `717ae50` Scaffold Phase 1 (Supabase migrations + Flutter app)
-- `b825c51` Native platform folders, codegen, snake_case JSON fix
-- `cba53c4` Supabase config schema fix + table-level grants for RLS
+**Remaining**: M7 deployment (hosted Supabase + Vercel, needs user credentials:
+Twitch, OpenRouter key optional, Google OAuth, Turnstile) and M8 Xbox stretch —
+see the completion plan. ML design decisions live in [ml-workflows.md](ml-workflows.md).
 
-Working tree is clean as of handoff (except local-only, gitignored `app/env/dev.json`).
+Working tree is clean as of handoff (local-only gitignored: `app/env/dev.json`,
+`supabase/.env.local` with CRON_SECRET=local-dev-cron-secret).
 
 ## Repo layout
 
