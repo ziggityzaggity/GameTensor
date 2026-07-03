@@ -58,15 +58,12 @@ an hour not finishing the demo. Specific choices for the remaining pieces:
   the backend. Both Supabase and Vercel MCP tools are connected to this Claude
   environment — use them (Milestone 7) instead of asking the user to click
   through dashboards where possible.
-- **LLM (Phase 4 chat)**: Claude API, default model `claude-sonnet-5`, called
-  ONLY from the `rag-chat` Edge Function behind the `LlmProvider` interface from
-  the plan (env var `LLM_PROVIDER=anthropic` selects the implementation). Never
-  from the client.
-- **Embeddings**: Anthropic does not offer an embeddings API. Use **Voyage AI**
-  (`voyage-3.5-lite`, 1024-dim) or OpenAI `text-embedding-3-small` (1536-dim)
-  behind the same provider interface. Set the pgvector column dimension to match
-  the chosen model — the `game_embeddings` schema in the plan uses `vector(1536)`;
-  adjust in the migration if you pick Voyage.
+- **LLM + embeddings**: SUPERSEDED by user decisions — see
+  [ml-workflows.md](ml-workflows.md). Summary: embeddings via `gte-small`
+  (384-dim) built into the Supabase Edge Runtime (free, self-hosted); chat via
+  OpenRouter free models through an OpenAI-compatible `LlmProvider` (plus a
+  deterministic stub for keyless dev), multi-turn, with a documented seam for a
+  future client-side browser LLM.
 - **Recommendations (Phase 5)**: pure SQL item-item co-occurrence — no external
   ML infra. A scheduled Edge Function (or `pg_cron` calling a SQL function)
   recomputes `game_similarity_cache` and `user_recommendations` nightly;
