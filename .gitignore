@@ -3,6 +3,7 @@
 
 # Env secrets — never commit real keys
 app/env/dev.json
+app/env/prod.json
 app/env/*.local.json
 supabase/.env.local
 

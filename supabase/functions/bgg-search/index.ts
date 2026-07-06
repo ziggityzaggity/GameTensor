@@ -28,6 +28,14 @@ Deno.serve(async (req) => {
     return json({ error: "method not allowed" }, 405);
   }
 
+  // Require an authenticated user. The anon/publishable key is itself a valid JWT
+  // with no `sub`, so without this an unauthenticated caller would pass the
+  // gateway's verify_jwt, skip the per-user rate limit, and still drive external
+  // BGG requests — draining the upstream quota. The app is auth-gated, so real
+  // callers always carry a user token.
+  const userId = userIdFromAuthHeader(req);
+  if (!userId) return json({ error: "unauthorized" }, 401);
+
   try {
     const { query } = await req.json();
     if (typeof query !== "string" || query.trim().length < 2 || query.trim().length > 100) {
@@ -36,12 +44,9 @@ Deno.serve(async (req) => {
 
     const admin = createAdminClient();
 
-    const userId = userIdFromAuthHeader(req);
-    if (userId) {
-      const allowed = await checkRateLimit(admin, userId, "bgg-search", RATE_LIMIT, RATE_WINDOW_SECONDS);
-      if (!allowed) {
-        return json({ error: "rate limit exceeded" }, 429);
-      }
+    const allowed = await checkRateLimit(admin, userId, "bgg-search", RATE_LIMIT, RATE_WINDOW_SECONDS);
+    if (!allowed) {
+      return json({ error: "rate limit exceeded" }, 429);
     }
 
     const searchResults = await searchBggGames(query.trim());

@@ -1,0 +1,5 @@
+{
+  "//": "Copy to prod.json (gitignored) for the production web build. Fill from the hosted Supabase project: SUPABASE_URL = https://<project-ref>.supabase.co, SUPABASE_ANON_KEY = the project's publishable key (sb_publishable_...). Build: flutter build web --release --dart-define-from-file=env/prod.json. Only the publishable key belongs here — never the service_role/secret key.",
+  "SUPABASE_URL": "https://YOUR-PROJECT-REF.supabase.co",
+  "SUPABASE_ANON_KEY": "sb_publishable_REPLACE_ME"
+}
