@@ -1,0 +1,9 @@
+.git
+supabase
+docs
+app/lib
+app/test
+app/android
+app/ios
+app/.dart_tool
+app/build/web/canvaskit/*.wasm.map
