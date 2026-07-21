@@ -18,3 +18,7 @@ supabase/.temp/
 
 # Claude Code local (machine-specific permissions)
 .claude/settings.local.json
+
+# Vercel (project link + local OIDC token / env files)
+.vercel
+.env*
